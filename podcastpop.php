@@ -73,6 +73,8 @@
       </select>
       Title for Display
       <input type="text" name="titleForDisplay" size=88>
+      <input type="submit" name="Submit" class="button-primary" value="Save" />
+      <hr/>
       <form name="form1" method="post" action="">
       <input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
 
@@ -89,12 +91,14 @@
       <script>
       document.body.onload = function(e) {
         var x = document.getElementById("selectEpisodeNumber");
-        for (xx = 0; xx <= 500; ++xx) {
+        for (epNum = 0; epNum <= 500; ++epNum) {
            var option = document.createElement("option");
-           option.text = xx;
+           option.text = epNum;
            x.add(option);
         }
       }
+      var url = "http://google.com";
+      var openWindow = window.open(url, 'callScriptPopup', 'width = 500, height = 500');
       </script>
 
       <?php

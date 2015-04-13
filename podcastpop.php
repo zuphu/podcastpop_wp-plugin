@@ -1,4 +1,4 @@
-<?php
+ <?php
 /*
   Plugin Name: Podcast Pop Bookmarks
   Plugin URI:  http://wordpress.org/extend/plugins/health-check/
@@ -10,35 +10,36 @@
   Domain Path: /lang
 */
 /*
-function podcastpop_shortcode( $atts, $content = null)	{
+  function podcastpop_shortcode( $atts, $content = null)	{
 
-	extract( shortcode_atts( array('message' => ''),
-                                    $atts ));
+  extract( shortcode_atts( array('message' => ''),
+  $atts ));
 
 
 
     
-	// this will display our message before the content of the shortcode
-	return 'boobs ' . $message . 'boogers' . $content;
-}
+  // this will display our message before the content of the shortcode
+  return 'boobs ' . $message . 'boogers' . $content;
+  }
 */
-function pippin_example_shortcode( $atts, $content = null)	{
+function pippin_example_shortcode( $atts )	{
     global $wpdb;
     $table_plugin = $wpdb->prefix . "pcpbplugin";
     $table_title  = $wpdb->prefix . "pcpbptitle";
 
-    extract( shortcode_atts( array(
-        'message' => '' /*episode Number???*/
-			), $atts 
-		) 
-	);
+    $a = shortcode_atts( array( 'episode' => '0'
+    ), $atts );
+
+    $episodeNumber = $a['episode'];
     
     $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber = " . 
-                                    $message . " ORDER BY startTime DESC");
+                                    $episodeNumber . " ORDER BY startTime DESC");
 
     $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
-                            $message);
-    $concat = "<table>
+                            $episodeNumber);
+    
+    $concat = "<h2>$title->episodeTitle</h2>
+    <table>
     <thead>
     <tr>
     <th>Time</th>
@@ -111,6 +112,7 @@ function pcpb_install () {
             'text'          => 'yo',
         ) 
     );
+    add_option("search_key", '');
 }
 
 // Hook for adding admin menus
@@ -189,6 +191,24 @@ global $wpdb;
 $episodeNumber = $_COOKIE['episodeNumber'];
 $table_title  = $wpdb->prefix . "pcpbptitle";
 
+if (isset($_POST['inputSaveTitle'])) {
+   if ( !empty($_POST['titleForDisplay']) ) {
+      $title = $_POST['titleForDisplay'];
+      $wpdb->query("DELETE FROM $table_title WHERE `episodeNumber` = " . $episodeNumber);
+                           
+            $wpdb->insert(
+                $table_title,
+                array(
+                    'episodeNumber' => $episodeNumber,
+                    'episodeTitle'  => $title,
+                )
+            );
+        }
+        else {
+            echo "Please enter a valid title!";
+        }
+    }
+
 $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
    $episodeNumber);
 
@@ -196,19 +216,29 @@ echo $title->episodeTitle;
 ?>" size=88>
                                      <input id="inputSaveTitle" type="submit" name="inputSaveTitle" class="btn btn-primary" value="Save" />
     <hr/>
-    Time <input id="theTime" class="time" name="inputTime" type="text">
+    Time <input id="inputTime" class="time" name="inputTime" type="text">
 
                   Bookmark Text <input id="idInputBookmarkText" name="inputBookmarkText" type="text" size=50>
    
                   <input id="idInputNewBookmark" type="submit" name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
+    Search <input name="search" id="inputSearchBookmark" type="text" value="<?php
+    if (isset($_POST['search'])) {
+       update_option("search_key", $_POST['search']);
+    }
+    echo get_option("search_key");
+?>"></input>
     </form>
 
 <?php
+    global $wpdb;
+    $table_plugin = $wpdb->prefix . "pcpbplugin";
+    $table_title = $wpdb->prefix . "pcpbptitle";
     $errorMessage = "";
     $title = $_POST['titleForDisplay'];
     $episodeNumber = $_POST['episodeNumber'];
     $bmtext = "";
     $inputTime = "";
+    $search = "";
               
     if (isset($_POST['inputNewBookmark'])) {
         if ( !empty($_POST['inputBookmarkText']) &&
@@ -216,43 +246,21 @@ echo $title->episodeTitle;
             $bmtext = $_POST['inputBookmarkText'];
             $inputTime = $_POST['inputTime'];
 
-            global $wpdb;
-            $table_name = $wpdb->prefix . "pcpbplugin";
-
             $wpdb->insert( 
-                $table_name, 
+                $table_plugin, 
                 array( 
                     'episodeNumber' => $episodeNumber,
                     'startTime'     => $inputTime,
                     'text'          => $bmtext,
                 ) 
             );
-            echo "<script>location='admin.php?page=mt-top-level-handle'</script>";
         }
         else
             echo "Both Time and Bookmark text need to be set.";
     }
-    else if (isset($_POST['inputSaveTitle'])) {
-        if ( !empty($_POST['titleForDisplay']) ) {
-            global $wpdb;
-            $table_name = $wpdb->prefix . "pcpbptitle";
-
-            $title = $_POST['titleForDisplay'];
-            $wpdb->query("DELETE FROM $table_name WHERE `episodeNumber` = " . $episodeNumber);
-                           
-            $wpdb->insert(
-                $table_name, 
-                array(
-                    'episodeNumber' => $episodeNumber,
-                    'episodeTitle'  => $title,
-                )
-            );
-
-            echo "<script>location='admin.php?page=mt-top-level-handle'</script>";
-        }
-        else {
-            echo "Please enter a valid title!";
-        }
+    else if (isset($_POST['buttonDelete'])) {
+        $id =  $_POST['buttonDelete'];
+        $wpdb->query("DELETE FROM $table_plugin WHERE `id` = " . $id);
     }
     else {
         $errorMessage = "Please enter a time and bookmark text";
@@ -260,19 +268,14 @@ echo $title->episodeTitle;
     }
     ?>
 
-    <!-- Worry about this later...
-                               Search:
-    <input id="inputSearchBookmark" type="text" />
-    <hr /> -->
-
     <!-- bookmarks table -->
 
-         <table id="tableBookmark" class="table table-striped">
+    <table id="tableBookmark" class="table table-striped">
     <thead>
     <tr>
     <th>Time</th>
     <th>Bookmark Text</th>
-    <td>id</td>
+    <th>Options</th>
     </tr>
     </thead>
 <?php
@@ -286,8 +289,16 @@ echo $title->episodeTitle;
         $episodeNumber = "default";
     }
 
-    $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber = " . 
-                                    $episodeNumber . " ORDER BY startTime DESC");
+    $search = get_option("search_key");
+    $explodedSearch = explode(" ", $search);
+    $startSearch = array_shift($explodedSearch);
+    $ee = "";
+    foreach ($explodedSearch as $es)
+        if (!empty($es))
+            $ee .= "OR text LIKE '%$es%' ";
+
+    $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber =
+       $episodeNumber AND (text LIKE '%$startSearch%' $ee) ORDER BY startTime DESC");
 
     $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
                             $episodeNumber);
@@ -299,11 +310,15 @@ echo $title->episodeTitle;
         echo "<tr>";
         echo "<td>" . $bookmark->startTime . "</td>";
         echo "<td>" . $bookmark->text . "</td>";
-        echo "<td>" . $bookmark->id . "</td>";
+        $id = $bookmark->id;
+        echo "<form method='POST'>";
+        echo "<td><button type='submit' name='buttonDelete' value=$id class='remove glyphicon glyphicon-remove-sign'></button></td>";
+        echo "</form>";
         echo "</tr>";
     }
 
     ?>
+
     </table>
 
     </div>
@@ -313,8 +328,21 @@ echo $title->episodeTitle;
     </script>
 
     <div style="visibility:hidden;">
-    <div id="dialog-message" title="Basic dialog">
-    <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+    <div id="dialog-message" title="Pick starting time">
+    <table>
+    <tr>
+    <td>Hour:</td><td><input id="inputHour" maxlength="2" value=0 min="0" max="59" type="number"></td>
+    <td><div id="errorHour"></div></td>
+    </tr>
+    <tr>
+    <td>Minute:</td><td><input id="inputMinute" maxlength="2" value=0 min="0" max="59" type="number"></td>
+    <td><div id="errorMinute"></div></td>
+    </tr>
+    <tr>
+    <td>Second</td><td><input id="inputSecond" maxlength="2" value=0 min="0" max="59" type="number"></td>
+    <td><div id="errorSecond"></div></td>
+    </tr>
+    </table>
     </div>
     </div>
 

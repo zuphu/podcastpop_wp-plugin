@@ -5,7 +5,7 @@ for (epNum = 1; epNum <= 500; ++epNum) {
   var option = document.createElement("option");
   option.value = epNum;
   option.text = epNum;
-    x.add(option);
+  x.add(option);
 }
 
 var episodeNumber = getCookie("episodeNumber");
@@ -18,21 +18,52 @@ else {
 }
 
 $(document).ready(function(){
-
+    $("#inputHour").spinner();
+    $("#inputMinute").spinner();
+    $("#inputSecond").spinner();
 });
-
+   
 $(".time").click(function(e) {
-    console.log($(this).width());
-    console.log($(this).height());
+    var currentTime = $(this).val();
+    var splitTime = currentTime.split(":");
+    var hour = splitTime[0];
+    var minute = splitTime[1];
+    var second = splitTime[2];
+
+    if (!$("#inputTime").val() == "") {
+	$("#inputHour").val(hour);
+	$("#inputMinute").val(minute);
+	$("#inputSecond").val(second);
+    }
 
     $( "#dialog-message" ).dialog({
-	modal: false,
+	modal: true,
 	buttons: {
 	    Ok: function() {
+		hour = parseInt($("#inputHour").val());
+		minute = parseInt($("#inputMinute").val());
+		second = parseInt($("#inputSecond").val());
+		if ( isNaN(hour) ) {
+    		    $(errorHour).html("Error: enter a number");
+		}
+		if ( isNaN(minute) ) {
+		    $(errorMinute).html("Error: enter a number");
+		}
+		if ( isNaN(second) ) {
+		    $(errorSecond).html("Error: enter a number");	    
+		}
+		if (isNaN(hour) || isNaN(minute) || isNaN(second))
+		    return;
+		
+		var time = hour + ":" + minute + ":" + second;
+		$("#inputTime").val(time);
+		$("#errorHour").html("")
+		$("#errorMinute").html("")
+		$("#errorSecond").html("")
+		
 		$( this ).dialog( "close" );
 	    }
 	},
-	position: $(this).position()
     });
 
     $("#dialog-message").dialog("open");

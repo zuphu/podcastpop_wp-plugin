@@ -1,0 +1,16 @@
+.body {
+    
+}
+
+.optionButtonStyle {
+  color: #ffffff;
+  background: #a5b0b8;
+  padding: 7px 7px 7px 7px;
+  text-decoration: none;    
+}
+
+.optionButtonStyle:hover {
+  background: #ff0000;
+  text-decoration: none;
+}
+    

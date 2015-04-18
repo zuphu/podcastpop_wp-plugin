@@ -2,7 +2,7 @@
 /*
   Plugin Name: Podcast Pop Bookmarks
   Plugin URI:  http://wordpress.org/extend/plugins/health-check/
-  Description: Checks the health of your WordPress install
+  Description: Bookmark your podcasts!!!
   Version:     0.1-alpha
   Author:      The Health Check Team
   Author URI:  http://wordpress.org/extend/plugins/health-check/
@@ -14,10 +14,7 @@
 
   extract( shortcode_atts( array('message' => ''),
   $atts ));
-
-
-
-    
+   
   // this will display our message before the content of the shortcode
   return 'boobs ' . $message . 'boogers' . $content;
   }
@@ -185,7 +182,7 @@ function mt_settings_page() {
     </select>
 
     Title for Display 
-        <input type="text" name="titleForDisplay" value="
+        <input type="text" name="titleForDisplay" placeholder="Enter a title" value="
 <?php 
 global $wpdb;
 $episodeNumber = $_COOKIE['episodeNumber'];
@@ -214,14 +211,14 @@ $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
 
 echo $title->episodeTitle;
 ?>" size=88>
-                                     <input id="inputSaveTitle" type="submit" name="inputSaveTitle" class="btn btn-primary" value="Save" />
+    <input id="inputSaveTitle" type="submit" name="inputSaveTitle" class="btn btn-primary" value="Save" />
     <hr/>
-    Time <input id="inputTime" class="time" name="inputTime" type="text">
+    Time<input id="inputTime" class="time" name="inputTime" placeholder="Click to select time" type="text">
 
-                  Bookmark Text <input id="idInputBookmarkText" name="inputBookmarkText" type="text" size=50>
+    Bookmark Text<input id="idInputBookmarkText" name="inputBookmarkText" placeholder="Bookmark text" type="text" size=50>
    
-                  <input id="idInputNewBookmark" type="submit" name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
-    Search <input name="search" id="inputSearchBookmark" type="text" value="<?php
+    <input id="idInputNewBookmark" type="submit" name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
+    Search <input placeholder="Search bookmark" name="search" id="inputSearchBookmark" type="text" value="<?php
     if (isset($_POST['search'])) {
        update_option("search_key", $_POST['search']);
     }
@@ -239,11 +236,12 @@ echo $title->episodeTitle;
     $bmtext = "";
     $inputTime = "";
     $search = "";
-              
+    
     if (isset($_POST['inputNewBookmark'])) {
         if ( !empty($_POST['inputBookmarkText']) &&
              !empty($_POST['inputTime'])) {
             $bmtext = $_POST['inputBookmarkText'];
+            //base64_encode($article_code);
             $inputTime = $_POST['inputTime'];
 
             $wpdb->insert( 
@@ -303,16 +301,14 @@ echo $title->episodeTitle;
     $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
                             $episodeNumber);
 
-    echo "<br/>" . $title->episodeTitle;
-
     foreach ( $bookmarks as $bookmark ) 
     {
         echo "<tr>";
-        echo "<td>" . $bookmark->startTime . "</td>";
-        echo "<td>" . $bookmark->text . "</td>";
+        echo "<td><input name='$id' type='text' value=$bookmark->startTime class='time'></input></td>";
+        echo "<td><textarea style='width: 50em; height: 2em;resize:none' multiline='true'>$bookmark->text</textarea></td>";
         $id = $bookmark->id;
         echo "<form method='POST'>";
-        echo "<td><button type='submit' name='buttonDelete' value=$id class='remove glyphicon glyphicon-remove-sign'></button></td>";
+        echo "<td><button type='submit' name='buttonDelete' value=$id class='optionButtonStyle glyphicon glyphicon-trash'></button></td>";
         echo "</form>";
         echo "</tr>";
     }
@@ -350,6 +346,8 @@ echo $title->episodeTitle;
     <head>
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <?php $css = plugins_url() . "/podcastpop" . "/style.css"; ?>
+    <link rel="stylesheet" href="<?php echo $css ?>" >
     </head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>

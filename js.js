@@ -2,19 +2,19 @@ var x = document.getElementById("selectEpisodeNumber");
 
 //Preload the episode number from 1 to 500
 for (epNum = 1; epNum <= 500; ++epNum) {
-  var option = document.createElement("option");
-  option.value = epNum;
-  option.text = epNum;
-  x.add(option);
+    var option = document.createElement("option");
+    option.value = epNum;
+    option.text = epNum;
+    x.add(option);
 }
 
 var episodeNumber = getCookie("episodeNumber");
 console.log(episodeNumber);
 if ( isNaN(episodeNumber) ) {
-   $("#selectEpisodeNumber").val("default");
+    $("#selectEpisodeNumber").val("default");
 }
 else {
-   $("#selectEpisodeNumber").val(episodeNumber);
+    $("#selectEpisodeNumber").val(episodeNumber);
 }
 
 $(document).ready(function(){
@@ -22,14 +22,15 @@ $(document).ready(function(){
     $("#inputMinute").spinner();
     $("#inputSecond").spinner();
 });
-   
+
 $(".time").click(function(e) {
     var currentTime = $(this).val();
     var splitTime = currentTime.split(":");
     var hour = splitTime[0];
     var minute = splitTime[1];
     var second = splitTime[2];
-
+    var id=($(this).attr('name'));
+    
     if (!$("#inputTime").val() == "") {
 	$("#inputHour").val(hour);
 	$("#inputMinute").val(minute);
@@ -37,7 +38,7 @@ $(".time").click(function(e) {
     }
 
     $( "#dialog-message" ).dialog({
-	modal: true,
+	modal: false,
 	buttons: {
 	    Ok: function() {
 		hour = parseInt($("#inputHour").val());
@@ -64,6 +65,13 @@ $(".time").click(function(e) {
 		$( this ).dialog( "close" );
 	    }
 	},
+	position: {
+            my: "left bottom", 
+            at: "right bottom",
+            of: $(this),
+	    collision: "flipfit"
+	}
+
     });
 
     $("#dialog-message").dialog("open");
@@ -72,15 +80,15 @@ $(".time").click(function(e) {
 
 
 $("#idInputNewBookmark").click(function() {
-   //$(this).prop('disabled', true);
-   //$('#tableBookmark tr:last').after('<tr>hitr><tr>bye</tr>');
-   //$(this).val("return value");
+    //$(this).prop('disabled', true);
+    //$('#tableBookmark tr:last').after('<tr>hitr><tr>bye</tr>');
+    //$(this).val("return value");
 });
 
 $('#selectEpisodeNumber').change(function(){
     var episodeNumber = $(this).val();
     document.cookie="episodeNumber=" + episodeNumber; 
-   $("#inputForm").submit();
+    $("#inputForm").submit();
 });
 
 $("#inputSaveTitle").click(function() {

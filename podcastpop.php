@@ -30,26 +30,22 @@ function pippin_example_shortcode( $atts )	{
     $episodeNumber = $a['episode'];
     
     $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber = " . 
-                                    $episodeNumber . " ORDER BY startTime DESC");
+                                    $episodeNumber . " ORDER BY startTime ASC");
 
     $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
                             $episodeNumber);
     
-    $concat = "<h2>$title->episodeTitle</h2>
-    <table>
-    <thead>
-    <tr>
-    <th>Time</th>
-    <th>Bookmark Text</th>
-    </tr>
-    </thead>";
+    $concat = "<h2>Episode Highlights</h2>
+    <table border='0' cellpadding='0' cellspacing='0' style='border: none;'>";
     
     foreach ($bookmarks as $bookmark) {
         $concat .= "<tr>";
-        $concat .= "<td>";
+        $concat .= "<ul>";
+        $concat .= "<td width='30%' style='border: none;'><li>";
         $concat .= $bookmark->startTime;
         $concat .= "</td>";
-        $concat .= "<td>";
+        $concat .= "</li></ul>";
+        $concat .= "<td width='70%' style='border: none;'>";
         $concat .= $bookmark->text;
         $concat .= "</td>";
         $concat .= "</tr>";
@@ -211,7 +207,7 @@ $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
 
 echo $title->episodeTitle;
 ?>" size=88>
-    <input id="inputSaveTitle" type="submit" name="inputSaveTitle" class="btn btn-primary" value="Save" />
+    <button id="inputSaveTitle" type="submit" name="inputSaveTitle" class="glyphicon glyphicon-floppy-disk btn btn-primary" value="Save">Save</button>
     <hr/>
 
 <div class="form-inline">

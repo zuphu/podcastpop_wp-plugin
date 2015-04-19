@@ -29,14 +29,21 @@ $(".time").click(function(e) {
     var hour = splitTime[0];
     var minute = splitTime[1];
     var second = splitTime[2];
-    var id=($(this).attr('name'));
+
     
-    if (!$("#inputTime").val() == "") {
+    if (!currentTime == "") {
 	$("#inputHour").val(hour);
 	$("#inputMinute").val(minute);
 	$("#inputSecond").val(second);
     }
-
+    else
+    {
+	$("#inputHour").val();
+	$("#inputMinute").val();
+	$("#inputSecond").val();
+    }
+    var id=$(this).attr('id');
+    
     $( "#dialog-message" ).dialog({
 	modal: false,
 	buttons: {
@@ -57,7 +64,7 @@ $(".time").click(function(e) {
 		    return;
 		
 		var time = hour + ":" + minute + ":" + second;
-		$("#inputTime").val(time);
+		$("#" + id).val(time);
 		$("#errorHour").html("")
 		$("#errorMinute").html("")
 		$("#errorSecond").html("")
@@ -66,8 +73,8 @@ $(".time").click(function(e) {
 	    }
 	},
 	position: {
-            my: "left bottom", 
-            at: "right bottom",
+            my: "right top", 
+            at: "left top",
             of: $(this),
 	    collision: "flipfit"
 	}

@@ -166,7 +166,7 @@ function mt_settings_page() {
 
     // Now display the settings editing screen
 
-    echo '<div class="wrap">';
+    echo '<div class="container-fluid">';
 
     // header
 
@@ -213,17 +213,25 @@ echo $title->episodeTitle;
 ?>" size=88>
     <input id="inputSaveTitle" type="submit" name="inputSaveTitle" class="btn btn-primary" value="Save" />
     <hr/>
-    Time<input id="inputTime" class="time" name="inputTime" placeholder="Click to select time" type="text">
 
-    Bookmark Text<input id="idInputBookmarkText" name="inputBookmarkText" placeholder="Bookmark text" type="text" size=50>
-   
+<div class="form-inline">
+  <div class="form-group has-feedback">
+    Time
+    <input placeholder="Click to select time" name="inputTime" id="inputTime" type="text" class="form-control time">
+    <span class="glyphicon glyphicon-time form-control-feedback" aria-hidden="true"></span>
+  </div>
+
+    Bookmark Text<input id="idInputBookmarkText" class="form-control" name="inputBookmarkText" placeholder="Enter bookmark text" type="text" size=50>
     <input id="idInputNewBookmark" type="submit" name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
+
     Search <input placeholder="Search bookmark" name="search" id="inputSearchBookmark" type="text" value="<?php
     if (isset($_POST['search'])) {
        update_option("search_key", $_POST['search']);
     }
     echo get_option("search_key");
 ?>"></input>
+       </div>   
+
     </form>
 
 <?php
@@ -265,6 +273,8 @@ echo $title->episodeTitle;
         echo $errorMessage;
     }
     ?>
+    </div><!-- End form inline -->
+    <br/>
 
     <!-- bookmarks table -->
 
@@ -304,7 +314,10 @@ echo $title->episodeTitle;
     foreach ( $bookmarks as $bookmark ) 
     {
         echo "<tr>";
-        echo "<td><input name='$id' type='text' value=$bookmark->startTime class='time'></input></td>";
+        echo "<td><div class='form-inline'><div class='form-group has-feedback'><input id='time$id' type='text' value=$bookmark->startTime class='time'></input>";
+        echo "<span class='glyphicon glyphicon-time form-control-feedback' aria-hidden='true'></span>";
+        echo "</div></div>";
+        echo "</td>";
         echo "<td><textarea style='width: 50em; height: 2em;resize:none' multiline='true'>$bookmark->text</textarea></td>";
         $id = $bookmark->id;
         echo "<form method='POST'>";
@@ -317,7 +330,7 @@ echo $title->episodeTitle;
 
     </table>
 
-    </div>
+    </div><!-- end form-inline div -->
 
     <script>
     console.log("<?php global $wpdb; echo $wpdb->prefix ?>");
@@ -342,6 +355,7 @@ echo $title->episodeTitle;
     </div>
     </div>
 
+    </div> <!-- end container -->
     </html>
     <head>
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">

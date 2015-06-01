@@ -188,7 +188,7 @@ $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
    $episodeNumber);
 
 if (isset($_POST['inputSaveTitle'])) {
-   if ( !empty($_POST['titleForDisplay']) ) {
+   if (($_POST['titleForDisplay']) && !ctype_space($_POST['titleForDisplay']) ) {
       $title = $_POST['titleForDisplay'];
       $wpdb->query("DELETE FROM $table_title WHERE `episodeNumber` = " . $episodeNumber);
 
@@ -199,12 +199,22 @@ if (isset($_POST['inputSaveTitle'])) {
                     'episodeTitle'  => $title,
                 )
             );
+            $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
+               $episodeNumber);
+
             echo $title->episodeTitle;
             /*What this does is update the title*/
         }
-        else {
-            echo "Episode Highlights";
-        }
+    else {
+        $wpdb->query("DELETE FROM $table_title WHERE `episodeNumber` = " . $episodeNumber);
+        $wpdb->insert(
+            $table_title,
+            array(
+                'episodeNumber' => $episodeNumber,
+                'episodeTitle'  => "Episode Highlights",
+            ));
+        echo "Episode Highlights";
+    }
     }
     else { /*Anything other than post */
         echo $title->episodeTitle;

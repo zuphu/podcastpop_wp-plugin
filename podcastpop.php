@@ -14,11 +14,12 @@
 
   extract( shortcode_atts( array('message' => ''),
   $atts ));
-   
+
   // this will display our message before the content of the shortcode
   return 'boobs ' . $message . 'boogers' . $content;
   }
 */
+define('WP_DEBUG', true);
 function pippin_example_shortcode( $atts )	{
     global $wpdb;
     $table_plugin = $wpdb->prefix . "pcpbplugin";
@@ -28,16 +29,16 @@ function pippin_example_shortcode( $atts )	{
     ), $atts );
 
     $episodeNumber = $a['episode'];
-    
-    $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber = " . 
+
+    $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber = " .
                                     $episodeNumber . " ORDER BY startTime ASC");
 
     $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
                             $episodeNumber);
-    
+
     $concat = "<h2>Episode Highlights</h2>
     <table border='0' cellpadding='0' cellspacing='0' style='border: none;'>";
-    
+
     foreach ($bookmarks as $bookmark) {
         $concat .= "<tr>";
         $concat .= "<ul>";
@@ -56,7 +57,7 @@ function pippin_example_shortcode( $atts )	{
 
 	// this will display our message before the content of the shortcode
 	return $concat;
- 
+
 }
 add_shortcode('podcastpop', 'pippin_example_shortcode');
 
@@ -97,13 +98,13 @@ function pcpb_install () {
 
     add_option( 'pcpb_db_version', $pcpb_db_version );
 
-    $wpdb->insert( 
-        $table_name, 
-        array( 
+    $wpdb->insert(
+        $table_name,
+        array(
             'episodeNumber' => 1,
             'startTime'     => '252525',
             'text'          => 'yo',
-        ) 
+        )
     );
     add_option("search_key", '');
 }
@@ -129,13 +130,13 @@ function podcastpop_bookmarks_toplevel_page() {
 // mt_settings_page() displays the page content for the Test settings submenu
 function mt_settings_page() {
 
-    //must check that the user has the required capability 
+    //must check that the user has the required capability
     if (!current_user_can('manage_options'))
     {
         wp_die( __('You do not have sufficient permissions to access this page.') );
     }
 
-    // variables for the field and option names 
+    // variables for the field and option names
     $opt_name = 'mt_favorite_color';
     $hidden_field_name = 'mt_submit_hidden';
     $data_field_name = 'mt_favorite_color';
@@ -169,7 +170,7 @@ function mt_settings_page() {
     echo "<h2>" . "Podcast Pop Bookmarks" . "</h2>";
 
     // settings form
-       
+
     ?>
     <form id="inputForm" method="POST">
     Episode Number
@@ -177,18 +178,20 @@ function mt_settings_page() {
     <option value="default">Select an episode...</option>
     </select>
 
-    Title for Display 
-        <input type="text" name="titleForDisplay" placeholder="Enter a title" value="
-<?php 
+    Title for Display
+        <input type="text" name="titleForDisplay" placeholder="Enter a title" defualt="fuck" value="
+<?php
 global $wpdb;
 $episodeNumber = $_COOKIE['episodeNumber'];
 $table_title  = $wpdb->prefix . "pcpbptitle";
+$title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
+   $episodeNumber);
 
 if (isset($_POST['inputSaveTitle'])) {
    if ( !empty($_POST['titleForDisplay']) ) {
       $title = $_POST['titleForDisplay'];
       $wpdb->query("DELETE FROM $table_title WHERE `episodeNumber` = " . $episodeNumber);
-                           
+
             $wpdb->insert(
                 $table_title,
                 array(
@@ -196,16 +199,18 @@ if (isset($_POST['inputSaveTitle'])) {
                     'episodeTitle'  => $title,
                 )
             );
+            echo $title->episodeTitle;
+            /*What this does is update the title*/
         }
         else {
-            echo "Please enter a valid title!";
+            echo "Episode Highlights";
         }
     }
+    else { /*Anything other than post */
+        echo $title->episodeTitle;
+    }
 
-$title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
-   $episodeNumber);
 
-echo $title->episodeTitle;
 ?>" size=88>
     <button id="inputSaveTitle" type="submit" name="inputSaveTitle" class="glyphicon glyphicon-floppy-disk btn btn-primary" value="Save">Save</button>
     <hr/>
@@ -226,7 +231,7 @@ echo $title->episodeTitle;
     }
     echo get_option("search_key");
 ?>"></input>
-       </div>   
+       </div>
 
     </form>
 
@@ -240,7 +245,7 @@ echo $title->episodeTitle;
     $bmtext = "";
     $inputTime = "";
     $search = "";
-    
+
     if (isset($_POST['inputNewBookmark'])) {
         if ( !empty($_POST['inputBookmarkText']) &&
              !empty($_POST['inputTime'])) {
@@ -248,13 +253,13 @@ echo $title->episodeTitle;
             //base64_encode($article_code);
             $inputTime = $_POST['inputTime'];
 
-            $wpdb->insert( 
-                $table_plugin, 
-                array( 
+            $wpdb->insert(
+                $table_plugin,
+                array(
                     'episodeNumber' => $episodeNumber,
                     'startTime'     => $inputTime,
                     'text'          => $bmtext,
-                ) 
+                )
             );
         }
         else
@@ -307,7 +312,7 @@ echo $title->episodeTitle;
     $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
                             $episodeNumber);
 
-    foreach ( $bookmarks as $bookmark ) 
+    foreach ( $bookmarks as $bookmark )
     {
         echo "<tr>";
         echo "<td><div class='form-inline'><div class='form-group has-feedback'><input id='time$id' type='text' value=$bookmark->startTime class='time'></input>";
@@ -363,7 +368,6 @@ echo $title->episodeTitle;
     <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
 <?php $dir = plugins_url() . "/podcastpop" . "/js.js"; ?>
     <script src="<?php echo $dir ?>"></script>
-
 
 <?php
 }

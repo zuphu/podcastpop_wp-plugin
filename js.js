@@ -30,7 +30,7 @@ $(".time").click(function(e) {
     var minute = splitTime[1];
     var second = splitTime[2];
 
-    
+
     if (!currentTime == "") {
 	$("#inputHour").val(hour);
 	$("#inputMinute").val(minute);
@@ -43,7 +43,7 @@ $(".time").click(function(e) {
 	$("#inputSecond").val();
     }
     var id=$(this).attr('id');
-    
+
     $( "#dialog-message" ).dialog({
 	modal: false,
 	buttons: {
@@ -58,22 +58,22 @@ $(".time").click(function(e) {
 		    $(errorMinute).html("Error: enter a number");
 		}
 		if ( isNaN(second) ) {
-		    $(errorSecond).html("Error: enter a number");	    
+		    $(errorSecond).html("Error: enter a number");
 		}
 		if (isNaN(hour) || isNaN(minute) || isNaN(second))
 		    return;
-		
+
 		var time = hour + ":" + minute + ":" + second;
 		$("#" + id).val(time);
 		$("#errorHour").html("")
 		$("#errorMinute").html("")
 		$("#errorSecond").html("")
-		
+
 		$( this ).dialog( "close" );
 	    }
 	},
 	position: {
-            my: "right top", 
+            my: "right top",
             at: "left top",
             of: $(this),
 	    collision: "flipfit"
@@ -94,7 +94,7 @@ $("#idInputNewBookmark").click(function() {
 
 $('#selectEpisodeNumber').change(function(){
     var episodeNumber = $(this).val();
-    document.cookie="episodeNumber=" + episodeNumber; 
+    document.cookie="episodeNumber=" + episodeNumber;
     $("#inputForm").submit();
 });
 

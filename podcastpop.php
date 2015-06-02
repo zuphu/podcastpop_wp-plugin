@@ -71,7 +71,6 @@ function pcpb_install () {
     $pcpb_db_version = "1.0";
 
     $pluginTable = $wpdb->prefix . "pcpbplugin";
-    $pluginTitle = $wpdb->prefix . "pcpbptitle";
 
     $charset_collate = $wpdb->get_charset_collate();
 
@@ -84,17 +83,9 @@ function pcpb_install () {
      UNIQUE KEY id (id)
    ) $charset_collate;";
 
-    $pluginTitle = "CREATE TABLE $pluginTitle (
-     id mediumint(9) NOT NULL AUTO_INCREMENT,
-     episodeNumber smallint NOT NULL,
-     episodeTitle varchar(60) DEFAULT '' NOT NULL,
-     updatedAt timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-     UNIQUE KEY id (id)
-   ) $charset_collate;";
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
     dbDelta( $pluginTable );
-    dbDelta( $pluginTitle );
 
     add_option( 'pcpb_db_version', $pcpb_db_version );
 
@@ -107,6 +98,7 @@ function pcpb_install () {
         )
     );
     add_option("search_key", '');
+    add_option("title_for_display", 'Episode Highlights');
 }
 
 // Hook for adding admin menus
@@ -184,41 +176,21 @@ function mt_settings_page() {
 global $wpdb;
 $episodeNumber = $_COOKIE['episodeNumber'];
 $table_title  = $wpdb->prefix . "pcpbptitle";
-$title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
-   $episodeNumber);
-
-if (isset($_POST['inputSaveTitle'])) {
-   if (($_POST['titleForDisplay']) && !ctype_space($_POST['titleForDisplay']) ) {
-      $title = $_POST['titleForDisplay'];
-      $wpdb->query("DELETE FROM $table_title WHERE `episodeNumber` = " . $episodeNumber);
-
-            $wpdb->insert(
-                $table_title,
-                array(
-                    'episodeNumber' => $episodeNumber,
-                    'episodeTitle'  => $title,
-                )
-            );
-            $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
-               $episodeNumber);
-
-            echo $title->episodeTitle;
-            /*What this does is update the title*/
-        }
+$title = get_option('title_for_display');
+$new_title = $_POST['titleForDisplay'];
+if (isset($new_title)) {
+   if ($new_title && !ctype_space($new_title) ) {
+            echo $new_title;
+            update_option('title_for_display', $new_title);
+    }
     else {
-        $wpdb->query("DELETE FROM $table_title WHERE `episodeNumber` = " . $episodeNumber);
-        $wpdb->insert(
-            $table_title,
-            array(
-                'episodeNumber' => $episodeNumber,
-                'episodeTitle'  => "Episode Highlights",
-            ));
+        update_option('title_for_display', 'Episode Highlights');
         echo "Episode Highlights";
     }
-    }
-    else { /*Anything other than post */
-        echo $title->episodeTitle;
-    }
+}
+else { /*Anything other than post */
+    echo $title;
+}
 
 
 ?>" size=88>
@@ -248,7 +220,6 @@ if (isset($_POST['inputSaveTitle'])) {
 <?php
     global $wpdb;
     $table_plugin = $wpdb->prefix . "pcpbplugin";
-    $table_title = $wpdb->prefix . "pcpbptitle";
     $errorMessage = "";
     $title = $_POST['titleForDisplay'];
     $episodeNumber = $_POST['episodeNumber'];
@@ -300,9 +271,8 @@ if (isset($_POST['inputSaveTitle'])) {
 <?php
     global $wpdb;
     $table_plugin = $wpdb->prefix . "pcpbplugin";
-    $table_title  = $wpdb->prefix . "pcpbptitle";
 
-    if(!isset($_COOKIE[$episodeNumber])) {
+    if (!isset($_COOKIE[$episodeNumber])) {
         $episodeNumber = $_COOKIE['episodeNumber'];
     } else {
         $episodeNumber = "default";

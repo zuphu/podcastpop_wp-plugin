@@ -202,7 +202,7 @@ else { /*Anything other than post */
 <div class="form-inline">
   <div class="form-group has-feedback">
     Time
-    <input placeholder="Click to select time" name="inputTime" id="inputTime" type="text" class="form-control time">
+    <input placeholder="hh:mm:ss" name="inputTime" id="inputTime" type="text" class="form-control time">
     <span class="glyphicon glyphicon-time form-control-feedback" aria-hidden="true"></span>
   </div>
 
@@ -235,6 +235,10 @@ else { /*Anything other than post */
             $bmtext = $_POST['inputBookmarkText'];
             //base64_encode($article_code);
             $inputTime = $_POST['inputTime'];
+
+            if  ( (substr_count($inputTime, ":")) == 1)
+               $inputTime = "00:" . $inputTime;
+            
 
             $wpdb->insert(
                 $table_plugin,

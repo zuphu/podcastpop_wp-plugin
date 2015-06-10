@@ -23,6 +23,7 @@ $(document).ready(function(){
     $("#inputSecond").spinner();
 });
 
+/*
 $(".time").click(function(e) {
     var currentTime = $(this).val();
     var splitTime = currentTime.split(":");
@@ -83,8 +84,7 @@ $(".time").click(function(e) {
 
     $("#dialog-message").dialog("open");
 });
-
-
+*/
 
 $("#idInputNewBookmark").click(function() {
     //$(this).prop('disabled', true);
@@ -113,14 +113,32 @@ function getCookie(cname) {
     return "";
 }
 
-function validateBookMark () {
+function validateBookMark() { 
+   if (validateTime() && validateBookmarkText())
+      postForm();
+}
+
+function validateTime () {
    var time = $('#inputTime').val();
    var colon = time.split(":").length - 1;
+   var regex = /^\d{1,2}:\d{1,2}(:\d{1,2})?$/;
    alert(colon);
    alert(time);
-   if(/^\d{1,2}:\d{1,2}:\d{1,2}$/.test(time) && colon == 2)
-      alert("good stuff");
+   if (regex.test(time) && (colon == 1 || colon == 2))
+      return true;
    else
-      alert("nope");
+      return false;
+}
+
+function validateBookmarkText() {
+   var text = $('#idInputBookmarkText').val();
+   if (text)
+      return true;
+   else
+      return false;
+}
+
+function postForm() {
+   alert("ok it's good");
 }
 

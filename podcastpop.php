@@ -60,9 +60,11 @@ function pippin_example_shortcode( $atts )	{
 
 }
 add_shortcode('podcastpop', 'pippin_example_shortcode');
-
+register_deactivation_hook( __FILE__, 'pcbb_deactivate' );
 /*add_shortcode('podcastpop', 'podcastpop_shortcode');*/
-
+function pcbb_deactivate () {
+  //deactivate function does here
+}
 /*
   Create new database tables for plugin and title
 */
@@ -205,7 +207,7 @@ else { /*Anything other than post */
   </div>
 
     Bookmark Text<input id="idInputBookmarkText" class="form-control" name="inputBookmarkText" placeholder="Enter bookmark text" type="text" size=50>
-    <input id="idInputNewBookmark" type="submit" name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
+    <input id="idInputNewBookmark" onClick='validateBookMark()' type="submit" name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
 
     Search <input placeholder="Search bookmark" name="search" id="inputSearchBookmark" type="text" value="<?php
     if (isset($_POST['search'])) {

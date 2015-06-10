@@ -112,3 +112,15 @@ function getCookie(cname) {
     }
     return "";
 }
+
+function validateBookMark () {
+   var time = $('#inputTime').val();
+   var colon = time.split(":").length - 1;
+   alert(colon);
+   alert(time);
+   if(/^\d{1,2}:\d{1,2}:\d{1,2}$/.test(time) && colon == 2)
+      alert("good stuff");
+   else
+      alert("nope");
+}
+

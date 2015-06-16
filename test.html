@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<h2>Podcast Pop Bookmarks</h2>
+
+    <form id="inputForm" method="POST">
+        <div class="row">
+            <div class="col-md-2" style="padding:15px; border:1px solid">
+                <select class="form-control" style="">
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+              </select>
+          </div>
+          <br/>
+          <div class="col-md-5" stlye="padding:0px;">
+            Title for Display
+            <input type="text" style="width:350px" name="titleForDisplay" placeholder="Enter a title" value="<?php
+            $title = get_option('title_for_display');
+            $new_title = $_POST['titleForDisplay'];
+            if ($title != $new_title) {
+                update_option('title_for_display', $new_title);
+            }
+            if (isset($new_title)) {
+                if ($new_title && !ctype_space($new_title) ) {
+                    echo $new_title;
+                    //update_option('title_for_display', $new_title);
+                }
+                else {
+                    update_option('title_for_display', 'Episode Highlights');
+                    echo "Episode Highlights";
+                }
+            }
+            else {
+                echo $title;
+            }?>" size=88>
+        </div>
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-2" style="padding:0px;border:1px solid;">
+            <button style="float:right;" id="inputSaveTitle" type="submit" name="inputSaveTitle" class="glyphicon glyphicon-floppy-disk btn btn-primary" value="Save">Save</button>
+        </div>
+    </div><!--end row-->
+    <hr/>
+    <div id="bookmarkForm" class="form-inline">
+        <div class="row">
+            <div class="col-md-2" style="padding:0px">
+                Time
+                <div class="input-group">
+                    <input placeholder="hh:mm:ss" style="width:130px;" name="inputTime" id="inputTime" type="text" class="form-control">
+                    <div class="input-group-addon">
+                        <span class="glyphicon glyphicon-time"></span>
+                    </div>
+                </div> <!-- end input-group -->
+            </div>
+            <div class="col-md-7">
+                Bookmark Text
+                <input id="idInputBookmarkText" class="form-control" name="inputBookmarkText" placeholder="Enter bookmark text" type="text" size=50>
+                <input id="idInputNewBookmark" onClick='validateBookMark();' name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
+            </div>
+            <div class="col-md-3" style="float:right;">
+       </div>
+   </div> <!-- end row -->
+</div> <!-- end form inline -->
+</form> <!-- end form -->
+
+
+<head>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <?php $css = plugins_url() . "/podcastpop" . "/style.css"; ?>
+    <link rel="stylesheet" href="<?php echo $css ?>" >
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    
+</head>
+
+</html>

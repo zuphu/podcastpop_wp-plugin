@@ -4,12 +4,13 @@ var x = document.getElementById("selectEpisodeNumber");
 for (epNum = 1; epNum <= 500; ++epNum) {
     var option = document.createElement("option");
     option.value = epNum;
-    option.text = epNum;
+    option.text = 'Episode' + " " + epNum;
     x.add(option);
 }
 
 var episodeNumber = getCookie("episodeNumber");
 console.log(episodeNumber);
+
 if ( isNaN(episodeNumber) ) {
     $("#selectEpisodeNumber").val("default");
 }
@@ -17,17 +18,21 @@ else {
     $("#selectEpisodeNumber").val(episodeNumber);
 }
 
-$(document).ready(function(){
-    $("#inputHour").spinner();
-    $("#inputMinute").spinner();
-    $("#inputSecond").spinner();
-});
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+// $(document).ready(function(){
+//     $("#inputHour").spinner();
+//     $("#inputMinute").spinner();
+//     $("#inputSecond").spinner();
+// });
 
 /*
 $(".time").click(function(e) {
     var currentTime = $(this).val();
     var splitTime = currentTime.split(":");
     var hour = splitTime[0];
+
     var minute = splitTime[1];
     var second = splitTime[2];
 
@@ -122,23 +127,44 @@ function validateTime () {
    var time = $('#inputTime').val();
    var colon = time.split(":").length - 1;
    var regex = /^\d{1,2}:\d{1,2}(:\d{1,2})?$/;
-   alert(colon);
-   alert(time);
    if (regex.test(time) && (colon == 1 || colon == 2))
       return true;
-   else
+   else {
+      alert("Please enter a time in the format 'hh:mm:ss'.");
+      $("#inputTime").focus();
       return false;
+   }
 }
 
 function validateBookmarkText() {
    var text = $('#idInputBookmarkText').val();
-   if (text)
+   if (text.trim()) {
       return true;
-   else
-      return false;
+   }
+   else {
+    alert("Please enter text for the bookmark");
+    $("#idInputBookmarkText").focus();
+    return false;
+   }       
+}
+
+function validateTitle () {
+$("#")
+
 }
 
 function postForm() {
-   alert("ok it's good");
+  $("#inputForm").submit();
 }
 
+
+$(".deleteButton").click(function (event) {
+  var result = confirm("Are you sure you want to remove this bookmark?");
+  if (result) {
+    $(this).attr("type", "submit");
+    $("#deleteForm").submit();
+  }
+  else {
+    return;
+  }
+});

@@ -1,74 +1,69 @@
- <?php
+<?php
 /*
-  Plugin Name: Podcast Pop Bookmarks
-  Plugin URI:  http://wordpress.org/extend/plugins/health-check/
-  Description: Bookmark your podcasts!!!
-  Version:     0.1-alpha
-  Author:      The Health Check Team
-  Author URI:  http://wordpress.org/extend/plugins/health-check/
-  Text Domain: health-check
-  Domain Path: /lang
-*/
-/*
-  function podcastpop_shortcode( $atts, $content = null)	{
-
-  extract( shortcode_atts( array('message' => ''),
-  $atts ));
-
-  // this will display our message before the content of the shortcode
-  return 'boobs ' . $message . 'boogers' . $content;
-  }
-*/
-define('WP_DEBUG', true);
-function pippin_example_shortcode( $atts )	{
+Plugin Name: Podcast Pop
+Plugin URI:  healthdrugsmarts.com
+Description: Podcast pop bookmarks
+Version:     0.1-alpha
+Author:      Anthony Guevara
+Author URI:  http://wordpress.org/extend/plugins/health-check/
+Text Domain: Hey
+Domain Path: /lang
+ */
+ define('WP_DEBUG', true);
+ function pippin_example_shortcode( $atts )	{
     global $wpdb;
     $table_plugin = $wpdb->prefix . "pcpbplugin";
-    $table_title  = $wpdb->prefix . "pcpbptitle";
 
     $a = shortcode_atts( array( 'episode' => '0'
-    ), $atts );
+        ), $atts );
 
     $episodeNumber = $a['episode'];
 
     $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber = " .
-                                    $episodeNumber . " ORDER BY startTime ASC");
+        $episodeNumber . " ORDER BY startTime ASC");
 
-    $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
-                            $episodeNumber);
+    $title = get_option('title_for_display');
 
-    $concat = "<h2>Episode Highlights</h2>
+    if (!$title)
+        $title = "Episode Bookmarks";
+
+    $concat = "<div id='podcast-bookmarks'><h2>$title</h2>
     <table border='0' cellpadding='0' cellspacing='0' style='border: none;'>";
 
-    foreach ($bookmarks as $bookmark) {
-        $concat .= "<tr>";
-        $concat .= "<ul>";
-        $concat .= "<td width='30%' style='border: none;'><li>";
-        $concat .= $bookmark->startTime;
-        $concat .= "</td>";
-        $concat .= "</li></ul>";
-        $concat .= "<td width='70%' style='border: none;'>";
-        $concat .= $bookmark->text;
-        $concat .= "</td>";
-        $concat .= "</tr>";
-    }
+        if ($bookmarks) {
+            foreach ($bookmarks as $bookmark) {
+                $concat .= "<tr>";
+                $concat .= "<ul>";
+                $concat .= "<td width='30%' style='border: none;'><li>";
+                $concat .= $bookmark->startTime;
+                $concat .= "</td>";
+                $concat .= "</li></ul>";
+                $concat .= "<td width='70%' style='border: none;'>";
+                $concat .= $bookmark->text;
+                $concat .= "</td>";
+                $concat .= "</tr>";
+            }
+        }
+        else {
+            $concat .= "No bookmarks for this episode.";
+        }
 
-    $concat .= "</table>";
-
+        $concat .= "</table></div>";
 
 	// this will display our message before the content of the shortcode
-	return $concat;
+        return $concat;
 
-}
-add_shortcode('podcastpop', 'pippin_example_shortcode');
-register_deactivation_hook( __FILE__, 'pcbb_deactivate' );
-/*add_shortcode('podcastpop', 'podcastpop_shortcode');*/
-function pcbb_deactivate () {
+    }
+    add_shortcode('podcastpop', 'pippin_example_shortcode');
+    register_deactivation_hook( __FILE__, 'pcbb_deactivate' );
+    /*add_shortcode('podcastpop', 'podcastpop_shortcode');*/
+    function pcbb_deactivate () {
   //deactivate function does here
-}
+    }
 /*
   Create new database tables for plugin and title
 */
-function pcpb_install () {
+  function pcpb_install () {
     global $wpdb;
     $pcpb_db_version = "1.0";
 
@@ -77,51 +72,38 @@ function pcpb_install () {
     $charset_collate = $wpdb->get_charset_collate();
 
     $pluginTable = "CREATE TABLE $pluginTable (
-     id mediumint(9) NOT NULL AUTO_INCREMENT,
-     episodeNumber smallint NOT NULL,
-     startTime time NOT NULL DEFAULT '00:00:00',
-     text varchar(60) DEFAULT '' NOT NULL,
-     updatedAt timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-     UNIQUE KEY id (id)
-   ) $charset_collate;";
+       id mediumint(9) NOT NULL AUTO_INCREMENT,
+       episodeNumber smallint NOT NULL,
+       startTime time NOT NULL DEFAULT '00:00:00',
+       text varchar(60) DEFAULT '' NOT NULL,
+       updatedAt timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       UNIQUE KEY id (id)
+       ) $charset_collate;";
 
 
-    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-    dbDelta( $pluginTable );
+ require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+ dbDelta( $pluginTable );
 
-    add_option( 'pcpb_db_version', $pcpb_db_version );
-
-    $wpdb->insert(
-        $table_name,
-        array(
-            'episodeNumber' => 1,
-            'startTime'     => '252525',
-            'text'          => 'yo',
-        )
-    );
-    add_option("search_key", '');
-    add_option("title_for_display", 'Episode Highlights');
+ add_option( 'pcpb_db_version', $pcpb_db_version );
+ add_option("search_key", '');
+ add_option("title_for_display", 'Episode Highlights');
 }
 
 // Hook for adding admin menus
 add_action('admin_menu', 'mt_add_pages');
 register_activation_hook( __FILE__, 'pcpb_install' );
+add_action( 'admin_init', 'wpse_remove_footer' );
+
+function wpse_remove_footer()
+{
+    add_filter( 'admin_footer_text',    '__return_false', 11 );
+    add_filter( 'update_footer',        '__return_false', 11 );
+}
 
 function mt_add_pages() {
-    add_options_page(__('Test Settings','menu-test'), __('Test Settings','menu-test'), 'manage_options', 'testsettings', 'mt_settings_page');
     add_menu_page("Hello World", "Podcast Pop Bookmarks", 'manage_options', 'mt-top-level-handle', 'mt_settings_page' );
 }
 
-// mt_toplevel_page() displays the page content for the custom Test Toplevel menu
-function podcastpop_bookmarks_toplevel_page() {
-    if (!current_user_can('manage_options'))  {
-        wp_die( __('You do not have sufficient permissions to access this page.') );
-    }
-    echo "<h2> DOOOOOOOOOOD </h2>";
-}
-
-
-// mt_settings_page() displays the page content for the Test settings submenu
 function mt_settings_page() {
 
     //must check that the user has the required capability
@@ -130,232 +112,206 @@ function mt_settings_page() {
         wp_die( __('You do not have sufficient permissions to access this page.') );
     }
 
-    // variables for the field and option names
-    $opt_name = 'mt_favorite_color';
-    $hidden_field_name = 'mt_submit_hidden';
-    $data_field_name = 'mt_favorite_color';
-
-    // Read in existing option value from database
-    $opt_val = get_option( $opt_name );
-
-    // See if the user has posted us some information
-    // If they did, this hidden field will be set to 'Y'
-    if( isset($_POST[ $hidden_field_name ]) && $_POST[ $hidden_field_name ] == 'Y' ) {
-        // Read their posted value
-        $opt_val = $_POST[ $data_field_name ];
-
-        // Save the posted value in the database
-        update_option( $opt_name, $opt_val );
-
-        // Put an settings updated message on the screen
-
-        ?>
-        <div class="updated"><p><strong>Settings Saved EOR</strong></p></div>
-<?php
-
-    }
-
-    // Now display the settings editing screen
-
-    echo '<div class="container-fluid">';
-
-    // header
-
-    echo "<h2>" . "Podcast Pop Bookmarks" . "</h2>";
-
-    // settings form
-
     ?>
+<!DOCTYPE html>
+<html lang="en">
+<h2>Podcast Pop Bookmarks</h2>
+<div class="container-fluid">
+
     <form id="inputForm" method="POST">
-    Episode Number
-        <select required name="episodeNumber" id="selectEpisodeNumber">
-    <option value="default">Select an episode...</option>
-    </select>
+        <div class="row">
+            <div class="col-md-2" style="padding-top:15px;">
+                <select class="form-control" style="width:190px;height:40px;background: linear-gradient(rgb(208,208,208), white);font-size:17px;" required name="episodeNumber" id="selectEpisodeNumber">
+                </select>
+            </div>
+            <br/>
+            <div class="col-md-5" stlye="padding:0px;">
+                <div class="form-inline">
+                    <div class="form-group" style="padding-bottom:15px;">
+                        <label data-toggle="tooltip" title="This is the heading that will be shown above the bookmarks-list on your web pages." for="inputTitlte">Title for Display</label>
+                        <input class="form-control" style="width:370px;" id="inputTitle" type="text" style="width:350px" name="titleForDisplay" placeholder="Enter a title" value="<?php
+                            $title = get_option('title_for_display');
+                            $new_title = $_POST['titleForDisplay'];
+                            
+                            if (!empty($_POST) && isset($new_title)) {
+                                update_option('title_for_display', $new_title);
+                                echo $new_title;
+                            }
+                            else {
+                                echo $title;
+                            }?>" size=88>
+                            <div style="padding:0px;">
+                                <?php $dir = plugins_url() . "/podcastpop" . "/title-for-display-example.jpg"; ?>
+                                <a href="<?php echo $dir ?>" target="_blank">Example</a>
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+            </div>
+            <div class="col-md-2" style="padding:0px">
+                <button style="float:right;" id="inputSaveTitle" type="submit" name="inputSaveTitle" class="glyphicon glyphicon-floppy-disk btn btn-primary" value="Save">Save</button>
+            </div>
+        </div><!--end row-->
+        <hr/>
+        <div id="bookmarkForm" class="form-inline">
+            <div class="row">
+                <div class="col-md-2" style="padding:0px">
+                    <label data-toggle="tooltip" title="Enter the start time of the bookmark, using format hh:mm:ss."><b>Time</b></label>
+                    <div class="input-group">
+                        <input placeholder="hh:mm:ss" style="width:130px;" name="inputTime" id="inputTime" type="text" class="form-control">
+                        <div class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </div>
+                    </div> <!-- end input-group -->
+                </div>
+                <div class="col-md-7">
+                    <b>Bookmark Text</b>
+                    <input id="idInputBookmarkText" class="form-control" name="inputBookmarkText" placeholder="Enter bookmark text" type="text" size=50>
+                    <input id="idInputNewBookmark" onClick='validateBookMark();' name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
+                </div>
+                <div class="col-md-3" style="float:right;">
+                   <b>Search</b> <input placeholder="Search bookmark" name="search" id="inputSearchBookmark" type="text" class="form-control">
+                </div>
+            </div> <!-- end row -->
+        </div> <!-- end form inline -->
+    </form> <!-- end form -->
 
-    Title for Display
-        <input type="text" name="titleForDisplay" placeholder="Enter a title" defualt="fuck" value="
-<?php
-global $wpdb;
-$episodeNumber = $_COOKIE['episodeNumber'];
-$table_title  = $wpdb->prefix . "pcpbptitle";
-$title = get_option('title_for_display');
-$new_title = $_POST['titleForDisplay'];
-if (isset($new_title)) {
-   if ($new_title && !ctype_space($new_title) ) {
-            echo $new_title;
-            update_option('title_for_display', $new_title);
-    }
-    else {
-        update_option('title_for_display', 'Episode Highlights');
-        echo "Episode Highlights";
-    }
-}
-else { /*Anything other than post */
-    echo $title;
-}
+     <?php
+     global $wpdb;
+     $table_plugin = $wpdb->prefix . "pcpbplugin";
+     $errorMessage = "";
+     $title = $_POST['titleForDisplay'];
+     $episodeNumber = $_POST['episodeNumber'];
+     $bmtext = "";
+     $inputTime = "";
+     $search = "";
 
-
-?>" size=88>
-    <button id="inputSaveTitle" type="submit" name="inputSaveTitle" class="glyphicon glyphicon-floppy-disk btn btn-primary" value="Save">Save</button>
-    <hr/>
-
-<div class="form-inline">
-  <div class="form-group has-feedback">
-    Time
-    <input placeholder="hh:mm:ss" name="inputTime" id="inputTime" type="text" class="form-control time">
-    <span class="glyphicon glyphicon-time form-control-feedback" aria-hidden="true"></span>
-  </div>
-
-    Bookmark Text<input id="idInputBookmarkText" class="form-control" name="inputBookmarkText" placeholder="Enter bookmark text" type="text" size=50>
-    <input id="idInputNewBookmark" onClick='validateBookMark()' type="submit" name="inputNewBookmark" class="btn btn-primary" value="+ New Bookmark"/>
-
-    Search <input placeholder="Search bookmark" name="search" id="inputSearchBookmark" type="text" value="<?php
-    if (isset($_POST['search'])) {
-       update_option("search_key", $_POST['search']);
-    }
-    echo get_option("search_key");
-?>"></input>
-       </div>
-
-    </form>
-
-<?php
-    global $wpdb;
-    $table_plugin = $wpdb->prefix . "pcpbplugin";
-    $errorMessage = "";
-    $title = $_POST['titleForDisplay'];
-    $episodeNumber = $_POST['episodeNumber'];
-    $bmtext = "";
-    $inputTime = "";
-    $search = "";
-
-    if (isset($_POST['inputNewBookmark'])) {
-        if ( !empty($_POST['inputBookmarkText']) &&
-             !empty($_POST['inputTime'])) {
+     if (isset($_POST['inputNewBookmark'])) {
+        if ( !empty($_POST['inputBookmarkText']) && !empty($_POST['inputTime']) ) {
             $bmtext = $_POST['inputBookmarkText'];
-            //base64_encode($article_code);
+    //base64_encode($article_code);
             $inputTime = $_POST['inputTime'];
 
             if  ( (substr_count($inputTime, ":")) == 1)
-               $inputTime = "00:" . $inputTime;
-            
+             $inputTime = "00:" . $inputTime;
 
-            $wpdb->insert(
-                $table_plugin,
-                array(
-                    'episodeNumber' => $episodeNumber,
-                    'startTime'     => $inputTime,
-                    'text'          => $bmtext,
+         $wpdb->insert(
+            $table_plugin,
+            array(
+                'episodeNumber' => $episodeNumber,
+                'startTime'     => $inputTime,
+                'text'          => $bmtext,
                 )
             );
         }
-        else
-            echo "Both Time and Bookmark text need to be set.";
     }
     else if (isset($_POST['buttonDelete'])) {
         $id =  $_POST['buttonDelete'];
         $wpdb->query("DELETE FROM $table_plugin WHERE `id` = " . $id);
     }
-    else {
-        $errorMessage = "Please enter a time and bookmark text";
-        echo $errorMessage;
-    }
-    ?>
-    </div><!-- End form inline -->
-    <br/>
+?>
+
+    <hr/>
 
     <!-- bookmarks table -->
+        <?php
+        global $wpdb;
+        $table_plugin = $wpdb->prefix . "pcpbplugin";
 
-    <table id="tableBookmark" class="table table-striped">
-    <thead>
-    <tr>
-    <th>Time</th>
-    <th>Bookmark Text</th>
-    <th>Options</th>
-    </tr>
-    </thead>
-<?php
-    global $wpdb;
-    $table_plugin = $wpdb->prefix . "pcpbplugin";
+        if (!isset($_COOKIE[$episodeNumber])) {
+            $episodeNumber = $_COOKIE['episodeNumber'];
+        } else {
+            $episodeNumber = "default";
+        }
 
-    if (!isset($_COOKIE[$episodeNumber])) {
-        $episodeNumber = $_COOKIE['episodeNumber'];
-    } else {
-        $episodeNumber = "default";
-    }
+        if (isset($_POST['search']))
+            $search = $_POST['search'];
 
-    $search = get_option("search_key");
-    $explodedSearch = explode(" ", $search);
-    $startSearch = array_shift($explodedSearch);
-    $ee = "";
-    foreach ($explodedSearch as $es)
-        if (!empty($es))
-            $ee .= "OR text LIKE '%$es%' ";
+        $explodedSearch = explode(" ", $search);
+        $startSearch = array_shift($explodedSearch);
+        $ee = "";
+        foreach ($explodedSearch as $es)
+            if (!empty($es))
+                $ee .= "OR text LIKE '%$es%' ";
 
-    $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber =
-       $episodeNumber AND (text LIKE '%$startSearch%' $ee) ORDER BY startTime DESC");
+            $bookmarks = $wpdb->get_results("SELECT * FROM $table_plugin WHERE episodeNumber =
+             $episodeNumber AND (text LIKE '%$startSearch%' $ee) ORDER BY startTime ASC");
 
-    $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
-                            $episodeNumber);
+            $title = $wpdb->get_row("SELECT * FROM $table_title WHERE episodeNumber = " .
+                $episodeNumber);
 
-    foreach ( $bookmarks as $bookmark )
-    {
-        echo "<tr>";
-        echo "<td><div class='form-inline'><div class='form-group has-feedback'><input id='time$id' type='text' value=$bookmark->startTime class='time'></input>";
-        echo "<span class='glyphicon glyphicon-time form-control-feedback' aria-hidden='true'></span>";
-        echo "</div></div>";
-        echo "</td>";
-        echo "<td><textarea style='width: 50em; height: 2em;resize:none' multiline='true'>$bookmark->text</textarea></td>";
-        $id = $bookmark->id;
-        echo "<form method='POST'>";
-        echo "<td><button type='submit' name='buttonDelete' value=$id class='optionButtonStyle glyphicon glyphicon-trash'></button></td>";
-        echo "</form>";
-        echo "</tr>";
-    }
 
-    ?>
+            if ($bookmarks) {
+                    echo "<table id='tableBookmark' class='table table-striped'>";
+                    echo "<thead>";
+                    echo "<tr>";
+                    echo "<th>Time</th>";
+                    echo "<th>Bookmark Text</th>";
+                    echo "</tr>";
+                    echo "</thead>";
+                foreach ( $bookmarks as $bookmark )
+                {
+                    echo "<tr>";
+                    echo "<td width='15%''>";
+                    echo "<div class='input-group'>";
+                    echo "<input class='form-control' id='time$id' value=$bookmark->startTime class='time'></input>";
+                    echo "<div class='input-group-addon'>";
+                    echo "<span class='glyphicon glyphicon-time'></span>";
+                    echo "</div>";//end input group addon
+                    echo "</div>";//end input group
+                    echo "</td>";
+                    echo "<td width='80%'><textarea style='width: 65em; height: 2em;resize:none' multiline='true'>$bookmark->text</textarea></td>";
+                    $id = $bookmark->id;
+                    echo "<form id='deleteForm' method='POST'>";
+                    echo "<td><button onClick='Javascript:alert('hi');' type='button' name='buttonDelete' value=$id class='deleteButton glyphicon glyphicon-trash'></button></td>";
+                    echo "</form>";
+                    echo "</tr>";
+                }
+            }
+            else
+                echo "There are no bookmarks to display.";
+
+            ?>
 
     </table>
 
-    </div><!-- end form-inline div -->
+</div> <!-- end container -->
+<!-- </div> -->
+<!-- retired code for time selection
+<div style="visibility:hidden;">
+<div id="dialog-message" title="Pick starting time">
+<table>
+<tr>
+<td>Hour:</td><td><input id="inputHour" maxlength="2" value=0 min="0" max="59" type="number"></td>
+<td><div id="errorHour"></div></td>
+</tr>
+<tr>
+<td>Minute:</td><td><input id="inputMinute" maxlength="2" value=0 min="0" max="59" type="number"></td>
+<td><div id="errorMinute"></div></td>
+</tr>
+<tr>
+<td>Second</td><td><input id="inputSecond" maxlength="2" value=0 min="0" max="59" type="number"></td>
+<td><div id="errorSecond"></div></td>
+</tr>
+</table>
+</div>
+</div>
+-->
 
-    <script>
-    console.log("<?php global $wpdb; echo $wpdb->prefix ?>");
-    </script>
-
-    <div style="visibility:hidden;">
-    <div id="dialog-message" title="Pick starting time">
-    <table>
-    <tr>
-    <td>Hour:</td><td><input id="inputHour" maxlength="2" value=0 min="0" max="59" type="number"></td>
-    <td><div id="errorHour"></div></td>
-    </tr>
-    <tr>
-    <td>Minute:</td><td><input id="inputMinute" maxlength="2" value=0 min="0" max="59" type="number"></td>
-    <td><div id="errorMinute"></div></td>
-    </tr>
-    <tr>
-    <td>Second</td><td><input id="inputSecond" maxlength="2" value=0 min="0" max="59" type="number"></td>
-    <td><div id="errorSecond"></div></td>
-    </tr>
-    </table>
-    </div>
-    </div>
-
-    </div> <!-- end container -->
-    </html>
-    <head>
+<head>
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <?php $css = plugins_url() . "/podcastpop" . "/style.css"; ?>
     <link rel="stylesheet" href="<?php echo $css ?>" >
-    </head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
-<?php $dir = plugins_url() . "/podcastpop" . "/js.js"; ?>
+    <?php $dir = plugins_url() . "/podcastpop" . "/js.js"; ?>
     <script src="<?php echo $dir ?>"></script>
-
-<?php
+</head>
+</html>
+    <?php
 }
 
 ?>

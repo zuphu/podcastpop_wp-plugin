@@ -1,16 +1,29 @@
+#wpcontent {
+	background-color: white;
+}
+
 .body {
     
 }
 
-.optionButtonStyle {
+.deleteButton {
   color: #ffffff;
   background: #a5b0b8;
   padding: 7px 7px 7px 7px;
-  text-decoration: none;    
+  text-decoration: none;
+  border-style:none;
+  padding: 13px;
 }
 
-.optionButtonStyle:hover {
+.deleteButton:hover {
   background: #ff0000;
   text-decoration: none;
 }
 
+.col-md-3 {
+	padding: 0px;
+}
+
+.hr {
+	padding: 0px;
+}

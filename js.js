@@ -19,7 +19,27 @@ else {
 }
 
 $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
+  // var image = '<img src="http://4.bp.blogspot.com/-JOqxgp-ZWe0/U3BtyEQlEiI/AAAAAAAAOfg/Doq6Q2MwIKA/s1600/google-logo-874x288.png">';
+
+  // $('[data-toggle="tooltip"]').tooltip({ html: true });
+
+  $('[data-toggle="tooltip"]').tooltip({ trigger: "manual" , html: true, animation:false})
+.on("mouseenter", function () {
+    var _this = this;
+    $(this).popover("show");
+    $(".popover").on("mouseleave", function () {
+        $(_this).popover('hide');
+    });
+}).on("mouseleave", function () {
+    var _this = this;
+    setTimeout(function () {
+        if (!$(".popover:hover").length) {
+            $(_this).popover("hide");
+        }
+    }, 300);
+});
+
+  
 })
 // $(document).ready(function(){
 //     $("#inputHour").spinner();
